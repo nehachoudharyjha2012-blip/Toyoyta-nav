@@ -1,16 +1,46 @@
-# React + Vite
+# 🚗 Toyota Multimedia OS (Universal Head Unit)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive, high-performance automotive infotainment interface and digital instrument cluster. Designed to automatically scale and adapt across **Android Phones/Tablets (e.g., Samsung Galaxy series)**, **Embedded In-Car Head Units**, and **Desktop/Laptop PC Browsers (Linux / Windows)**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📱 Device Compatibility & Auto-Adaptation
 
-## React Compiler
+| Device Category | Supported Environments | Layout Optimization |
+| :--- | :--- | :--- |
+| **Android Smartphones** | Chrome, Firefox, Native APK | Adaptive compact split view, vertical scroll isolation, touch dialer |
+| **In-Car Tablets / Head Units** | Landscape Android, WebViews | Wide double-panel soundstage & navigation radar, HUD telemetry |
+| **Desktop / Laptop PCs** | Chrome, Firefox, Edge, Safari | Responsive high-DPI scaling, full multi-window dashboard |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🌟 Core System Modules
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* **🗺️ Tactical Navigation & OSRM Engine:** Dynamic search geocoding (Nominatim), turn-by-turn guidance HUD, and automated route polyline plotting.
+* **🛰️ Hybrid Online/Offline Map System:** Automatically serves local offline map tiles (`public/tiles/{z}/{x}/{y}.png`) when offline, and pulls live high-res OpenStreetMap tiles when connected.
+* **📍 Real Hardware Satellite GPS:** Live speedometer (km/h), compass heading, and zero-cache hardware coordinate centering.
+* **🎵 Persistent Audio Soundstage:** Global background audio player that continues playing across all tab switches, with seeking (±10s), scrubber, and local file import (`+ Add Tracks`).
+* **📻 Live Internet Radio Matrix:** Multi-station live streaming engine (Bollywood Hits, Lo-Fi Chill, BBC World Service, Retro Classics).
+* **📞 Anti-Flicker Telephony Dialer:** Non-blocking memoized keypad with instant emergency shortcuts (`112`, `1033` NHAI).
+* **⛽ Trip & Fuel Calculator:** Real-time mileage, cost, and fuel efficiency estimator.
+* **📺 Media Stream Hub:** Responsive video and YouTube embed pipeline.
+* **🔋 Telemetry Header Bar:** Live clock, ambient temperature (Open-Meteo REST API), and real-time battery/charging indicators.
+
+---
+
+## 🚀 Setup Guide (All Devices)
+
+### 1. Development & Local Run (PC / Linux / Windows)
+```bash
+# Clone the repository
+git clone [https://github.com/YOUR_USERNAME/toyota-nav.git](https://github.com/YOUR_USERNAME/toyota-nav.git)
+cd toyota-nav
+
+# Install dependencies
+npm install
+
+# Start local server accessible to all network devices
+npm run dev -- --host
+On PC: Open http://localhost:5173
+
+On Android/Tablet (Same Wi-Fi): Open http://<YOUR_LAPTOP_IP>:5173

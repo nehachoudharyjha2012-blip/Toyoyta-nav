@@ -1,0 +1,96 @@
+/* Strict Toyota OEM Dark & Light Themes */
+.theme-dark {
+  --oem-bg: #000000;
+  --oem-sidebar: #111111;
+  --oem-blue: #0056D2;
+  --oem-text: #FFFFFF;
+  --oem-text-muted: #888888;
+  --oem-panel: #1A1A1A;
+  --oem-border: #2A2A2A;
+  --oem-pill-bg: rgba(20, 20, 20, 0.9);
+  --map-tile-filter: brightness(0.7) contrast(1.2) grayscale(0.2) invert(1) hue-rotate(180deg);
+}
+
+.theme-light {
+  --oem-bg: #E5E7EB;
+  --oem-sidebar: #FFFFFF;
+  --oem-blue: #0056D2;
+  --oem-text: #111827;
+  --oem-text-muted: #4B5563;
+  --oem-panel: #FFFFFF;
+  --oem-border: #D1D5DB;
+  --oem-pill-bg: rgba(255, 255, 255, 0.92);
+  --map-tile-filter: none;
+}
+
+body {
+  background-color: var(--oem-bg) !important;
+  color: var(--oem-text) !important;
+  overflow: hidden;
+  user-select: none;
+}
+
+.oem-sidebar {
+  background-color: var(--oem-sidebar);
+  border-right: 1px solid var(--oem-border);
+  box-shadow: 6px 0 20px rgba(0,0,0,0.3);
+  z-index: 50;
+}
+
+.oem-active-tab {
+  background-color: var(--oem-blue);
+  color: #FFFFFF !important;
+  border-radius: 12px;
+}
+
+.oem-panel {
+  background-color: var(--oem-panel);
+  border: 1px solid var(--oem-border);
+  border-radius: 16px;
+  color: var(--oem-text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.oem-pill {
+  background-color: var(--oem-pill-bg);
+  border: 1px solid var(--oem-border);
+  border-radius: 30px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--oem-text);
+}
+
+/* Map Tile Dark/Light Adaptation */
+.leaflet-container {
+  background: var(--oem-bg) !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.theme-dark .leaflet-tile {
+  filter: var(--map-tile-filter);
+}
+
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* Dynamic Live Audio Visualizer Bars */
+@keyframes visualizer-wave-1 { 0%, 100% { height: 6px; } 50% { height: 38px; } }
+@keyframes visualizer-wave-2 { 0%, 100% { height: 18px; } 50% { height: 48px; } }
+@keyframes visualizer-wave-3 { 0%, 100% { height: 8px; } 50% { height: 32px; } }
+@keyframes visualizer-wave-4 { 0%, 100% { height: 24px; } 50% { height: 56px; } }
+@keyframes visualizer-wave-5 { 0%, 100% { height: 12px; } 50% { height: 42px; } }
+
+.vis-bar-1 { animation: visualizer-wave-1 0.7s ease-in-out infinite; }
+.vis-bar-2 { animation: visualizer-wave-2 0.5s ease-in-out infinite 0.15s; }
+.vis-bar-3 { animation: visualizer-wave-3 0.8s ease-in-out infinite 0.3s; }
+.vis-bar-4 { animation: visualizer-wave-4 0.6s ease-in-out infinite 0.1s; }
+.vis-bar-5 { animation: visualizer-wave-5 0.75s ease-in-out infinite 0.25s; }
+
+.spring-tap {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.12s ease;
+}
+.spring-tap:active {
+  transform: scale(0.93);
+}

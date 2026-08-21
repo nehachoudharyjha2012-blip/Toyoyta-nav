@@ -33,7 +33,7 @@ A responsive, high-performance automotive infotainment interface and digital ins
 ### 1. Development & Local Run (PC / Linux / Windows)
 ```bash
 # Clone the repository
-git clone [https://github.com/YOUR_USERNAME/toyota-nav.git](https://github.com/YOUR_USERNAME/toyota-nav.git)
+git clone https://github.com/nehachoudharyjha2012-blip/Toyoyta-nav.git
 cd toyota-nav
 
 # Install dependencies

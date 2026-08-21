@@ -1,0 +1,154 @@
+# 🚗 Toyota Multimedia OS — Universal Cross-Platform Guide
+
+Toyota Multimedia OS is a responsive, hardware-accelerated in-car infotainment dashboard and digital instrument cluster. It dynamically scales across **Desktop/Laptop PCs (Linux / Windows)**, **Android Smartphones (Samsung, Pixel, etc.)**, and **In-Car Android Head Units / Tablets**.
+
+---
+
+## 📱 Platform Matrix & Requirements
+
+| Platform | Recommended Environment | Key Capabilities |
+| :--- | :--- | :--- |
+| **Linux (Ubuntu/Debian)** | Node.js 18+, Chrome, Firefox | Development host, MOBAC tile generation, APK compiling |
+| **Windows 10 / 11** | Node.js 18+, Chrome, Edge | Development host, local testing, MOBAC tile generation |
+| **Android Smartphone** | Android 8.0+, Chrome / Native APK | Hardware GPS tracking, touch dialer, portable head unit |
+| **In-Car Head Unit / Tablet** | Landscape Android 9.0+, Native APK | Fullscreen cluster HUD, dual-pane nav radar & soundstage |
+
+---
+
+## ⚡ Quick Start: Local Setup (PC & Mac)
+
+### 1. Clone Repository & Install Dependencies
+```bash
+git clone [https://github.com/YOUR_USERNAME/toyota-nav.git](https://github.com/YOUR_USERNAME/toyota-nav.git)
+cd toyota-nav
+npm install
+
+2. Start Dev Server for Local Network Access
+Bash
+
+npm run dev -- --host
+
+    On your PC: Open http://localhost:5173
+
+    On Android Devices (Same Wi-Fi): Open http://<YOUR_PC_IP>:5173
+
+📱 Running on Android Devices
+Method 1: Web Browser (Instant Testing)
+
+    Open Chrome on your Android phone/tablet.
+
+    In the URL bar, go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure
+
+    Set the flag to Enabled.
+
+    In the text box, type your laptop's address: http://<YOUR_PC_IP>:5173
+
+    Tap Relaunch.
+
+    Navigate to http://<YOUR_PC_IP>:5173, click LOCK REAL GPS, and select Allow when prompted for location access.
+
+Method 2: Standalone Native APK (Cloud Build via GitHub)
+
+    Commit and push your code to GitHub:
+    Bash
+
+    git add .
+    git commit -m "feat: release build"
+    git push origin main
+
+    Go to your repository on GitHub and click the Actions tab.
+
+    Select the latest Build Android APK workflow run.
+
+    Download the Toyota-OS-Debug-APK artifact at the bottom of the page.
+
+    Transfer the .apk to your phone/head unit and install.
+
+Method 3: Build APK Locally via Terminal
+Bash
+
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+
+Output location: android/app/build/outputs/apk/debug/app-debug.apk
+🗺️ Offline City Maps: Complete MOBAC Guide (All OS)
+
+To enable 100% offline navigation for your specific city or region, use Mobile Atlas Creator (MOBAC) to export local map tiles.
+1. Install Java
+
+    Linux (Ubuntu/Debian):
+    Bash
+
+    sudo apt update && sudo apt install -y openjdk-17-jre
+
+    Windows: Download and install Java 17 from adoptium.net.
+
+2. Download & Run MOBAC
+
+    Download the MOBAC zip archive from mobac.sourceforge.io.
+
+    Extract the archive:
+
+        Linux: Run java -jar Mobile_Atlas_Creator.jar
+
+        Windows: Double-click Mobile_Atlas_Creator.exe
+
+3. Configure Tile Export Format
+
+    When prompted for atlas format, select OSMTracker tile storage and click OK.
+    (If not prompted, go to Atlas settings -> New -> choose OSMTracker tile storage).
+
+4. Select Map Region & Detail Levels
+
+    Under Map source (top-left), select OpenStreetMap Standard.
+
+    Pan and zoom to your target city on the map canvas.
+
+    Hold Right-Click and drag a bounding box across your city.
+
+    Under Zoom levels, check the boxes for:
+
+        [x] 14 (City overview)
+
+        [x] 15 (Districts)
+
+        [x] 16 (Neighborhoods)
+
+        [x] 17 (Streets & main lanes)
+
+        [x] 18 (Detailed building outlines)
+
+5. Generate & Place Tiles
+
+    Under Atlas Content, enter a name (e.g., CityMap) and click Add selection.
+
+    Click Create atlas at the bottom-left.
+
+    Once completed, click Open Atlas Folder.
+
+    Copy the numbered folders (14, 15, 16, 17, 18) directly into your project's public/tiles/ directory:
+
+Plaintext
+
+toyota-nav/
+└── public/
+    └── tiles/
+        ├── 14/
+        ├── 15/
+        ├── 16/
+        ├── 17/
+        └── 18/
+            └── <x>/
+                └── <y>.png
+
+6. Verification
+
+Turn off Wi-Fi and Mobile Data on your device. Launch the app—the UI will switch to OFFLINE MODE and render your local city tiles directly from storage.
+🔒 Security, Privacy & Permissions Notice
+
+    Satellite Location (ACCESS_FINE_LOCATION): Geolocation coordinates are processed strictly in-memory on the device for real-time speed calculation, route positioning, and map centering. No location telemetry is stored or sent to remote servers.
+
+    Telephony Gateway (CALL_PHONE): Initiates calls via standard Android system intents (tel:). Does not access contact books or read call logs.
+
+    Public APIs: Reverse geocoding (Nominatim), route geometry calculation (OSRM), and ambient weather temperature (Open-Meteo) run via public HTTPS endpoints

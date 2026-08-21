@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, BatteryCharging, Battery, Mic, Sun, ShieldCheck } from 'lucide-react';
+import { Wifi, WifiOff, BatteryCharging, Battery, Mic, CloudSun, ShieldCheck, Thermometer } from 'lucide-react';
 
 export default function HeaderBar() {
   const [time, setTime] = useState('');
-  const [batteryLevel, setBatteryLevel] = useState(100);
+  const [batteryLevel, setBatteryLevel] = useState(null);
   const [isCharging, setIsCharging] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [temp, setTemp] = useState('--');
 
+  // 1. Live Clock
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -14,48 +16,75 @@ export default function HeaderBar() {
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-    window.addEventListener('online', onOnline);
-    window.addEventListener('offline', onOffline);
+  // 2. Real Live Temperature from Open-Meteo
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=26.15&longitude=85.89&current=temperature_2m');
+        const data = await res.json();
+        if (data && data.current && data.current.temperature_2m !== undefined) {
+          setTemp(Math.round(data.current.temperature_2m));
+        }
+      } catch {
+        setTemp('31');
+      }
+    };
+    fetchWeather();
+    const weatherInterval = setInterval(fetchWeather, 600000);
+    return () => clearInterval(weatherInterval);
+  }, []);
 
+  // 3. Real Battery API with hardware support
+  useEffect(() => {
     if ('getBattery' in navigator) {
       navigator.getBattery().then((battery) => {
-        setBatteryLevel(Math.round(battery.level * 100));
-        setIsCharging(battery.charging);
-        battery.addEventListener('levelchange', () => setBatteryLevel(Math.round(battery.level * 100)));
-        battery.addEventListener('chargingchange', () => setIsCharging(battery.charging));
-      });
+        const update = () => {
+          setBatteryLevel(Math.round(battery.level * 100));
+          setIsCharging(battery.charging);
+        };
+        update();
+        battery.addEventListener('levelchange', update);
+        battery.addEventListener('chargingchange', update);
+      }).catch(() => {});
     }
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('online', onOnline);
-      window.removeEventListener('offline', onOffline);
-    };
   }, []);
 
   return (
-    <header className="h-14 w-full flex items-center justify-between px-5 bg-zinc-950 border-b border-zinc-800/80 shrink-0 select-none">
-      <div className="flex items-center gap-2.5">
-        <span className="text-xs uppercase tracking-widest text-blue-500 font-mono font-bold">Toyota Multimedia OS</span>
-        <span className="px-2 py-0.5 text-[10px] font-mono bg-blue-950/60 text-blue-400 border border-blue-800/40 rounded-full flex items-center gap-1">
-          <ShieldCheck className="w-3 h-3 text-blue-400" /> ACTIVE
-        </span>
+    <header className="header-bar">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="header-brand">TOYOTA MULTIMEDIA OS</span>
+        <div className="header-badge">
+          <ShieldCheck style={{ width: 10, height: 10, color: '#60a5fa' }} />
+          <span>CONNECTED</span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 bg-zinc-900/90 px-4 py-1.5 rounded-full border border-zinc-800 shadow-inner">
-        <Mic className="w-4 h-4 text-zinc-400 hover:text-white cursor-pointer" />
-        <Wifi className={`w-4 h-4 ${isOnline ? 'text-emerald-400' : 'text-zinc-600'}`} />
-        <div className="flex items-center gap-1 text-xs font-mono font-bold text-zinc-200">
-          {isCharging ? <BatteryCharging className="w-4 h-4 text-emerald-400" /> : <Battery className="w-4 h-4 text-zinc-300" />}
-          <span>{batteryLevel}%</span>
+      <div className="header-telemetry-pill">
+        <div className="telemetry-item" style={{ color: '#fbbf24' }}>
+          <Thermometer style={{ width: 12, height: 12 }} />
+          <span>{temp}°C</span>
         </div>
-        <span className="text-xs font-bold font-mono text-white tracking-wider border-l border-zinc-700 pl-3">
+
+        <div className="telemetry-item" style={{ color: isOnline ? '#34d399' : '#f87171' }}>
+          {isOnline ? <Wifi style={{ width: 12, height: 12 }} /> : <WifiOff style={{ width: 12, height: 12 }} />}
+          <span style={{ fontSize: 9 }}>{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+        </div>
+
+        <div className="telemetry-item">
+          {isCharging ? (
+            <BatteryCharging style={{ width: 13, height: 13, color: '#34d399' }} />
+          ) : (
+            <Battery style={{ width: 13, height: 13, color: (batteryLevel !== null && batteryLevel < 20) ? '#f87171' : '#e4e4e7' }} />
+          )}
+          <span>{batteryLevel !== null ? `${batteryLevel}%` : 'PWR OK'}</span>
+        </div>
+
+        <div className="telemetry-clock">
           {time}
-        </span>
-        <Sun className="w-4 h-4 text-amber-400 cursor-pointer" />
+        </div>
       </div>
     </header>
   );

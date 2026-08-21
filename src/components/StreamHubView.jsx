@@ -1,33 +1,51 @@
-import React, { useState } from "react";
-import { Tv, Music, Link2, Play, Download, Loader2 } from "lucide-react";
-export default function StreamHubView({ onPlayTrack }) {
-  const [yt, setYt] = useState(""); const [sp, setSp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const handleYT = async (mode) => {
-    if(!yt) return; setLoading(true);
-    const m = yt.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-    const id = m ? m[1] : yt;
-    if(mode === 'stream' && onPlayTrack) onPlayTrack({title: "YouTube Stream", artist: "Direct Audio", isYT: true, ytId: id});
-    if(mode === 'dl') window.open(`https://invidious.nerdvpn.de/latest_version?id=${id}&itag=140`);
-    setLoading(false); setYt("");
+import React, { useState } from 'react';
+import { Tv, Play } from 'lucide-react';
+
+export default function StreamHubView() {
+  const [url, setUrl] = useState('');
+  const [activeEmbed, setActiveEmbed] = useState('');
+
+  const handleStream = () => {
+    if (!url) return;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    if (match && match[1]) {
+      setActiveEmbed(`https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1`);
+    } else {
+      setActiveEmbed(url);
+    }
   };
+
   return (
-    <div className="w-full h-full p-8 flex flex-col">
-      <div className="border-b border-[#2A2A2A] pb-4 mb-6"><h1 className="text-2xl font-bold uppercase">Audio Stream Engine</h1></div>
-      <div className="grid grid-cols-2 gap-8 flex-1 min-h-0">
-        <div className="oem-panel p-6 flex flex-col gap-4">
-          <div className="flex items-center gap-3 text-red-500"><Tv size={24}/><h2 className="text-lg font-bold text-white">YouTube Pipeline</h2></div>
-          <div className="relative"><Link2 size={18} className="absolute left-3 top-3.5 text-gray-500"/><input value={yt} onChange={e=>setYt(e.target.value)} placeholder="Paste Link..." className="w-full pl-10 pr-4 py-3 bg-[#222] rounded-lg border border-[#333] outline-none" /></div>
-          <div className="grid grid-cols-2 gap-3 mt-auto">
-            <button onClick={() => handleYT('stream')} className="py-4 bg-red-600 rounded-lg font-bold flex justify-center gap-2 spring-tap"><Play size={18}/> Stream</button>
-            <button onClick={() => handleYT('dl')} className="py-4 bg-[#333] rounded-lg font-bold flex justify-center gap-2 spring-tap"><Download size={18}/> Download</button>
+    <div className="split-view">
+      <div className="card-panel" style={{ flex: '0 0 38%' }}>
+        <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#ef4444', fontWeight: 'bold' }}>STREAM PIPELINE</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+          <input
+            type="text"
+            placeholder="Paste YouTube Link or Video URL..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="input-dark"
+          />
+          <button onClick={handleStream} className="action-btn-primary" style={{ backgroundColor: '#dc2626' }}>
+            <Play style={{ width: 12, height: 12 }} />
+            <span>START STREAM</span>
+          </button>
+        </div>
+        <div style={{ fontSize: 9, color: '#71717a', fontFamily: 'monospace', marginTop: 'auto' }}>
+          Video & Audio Stream Gateway
+        </div>
+      </div>
+
+      <div className="card-panel" style={{ flex: '0 0 60%', padding: 0, overflow: 'hidden' }}>
+        {activeEmbed ? (
+          <iframe title="Stream Player" src={activeEmbed} width="100%" height="100%" frameBorder="0" allow="autoplay; fullscreen" style={{ border: 'none' }} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#52525b', gap: 6 }}>
+            <Tv style={{ width: 26, height: 26 }} />
+            <span style={{ fontSize: 10, fontFamily: 'monospace' }}>Awaiting Video Link</span>
           </div>
-        </div>
-        <div className="oem-panel p-6 flex flex-col gap-4">
-          <div className="flex items-center gap-3 text-emerald-500"><Music size={24}/><h2 className="text-lg font-bold text-white">Spotify Resolver</h2></div>
-          <div className="relative"><Link2 size={18} className="absolute left-3 top-3.5 text-gray-500"/><input value={sp} onChange={e=>setSp(e.target.value)} placeholder="Paste Spotify Track..." className="w-full pl-10 pr-4 py-3 bg-[#222] rounded-lg border border-[#333] outline-none" /></div>
-          <div className="mt-auto text-xs text-gray-400 bg-[#222] p-4 rounded-lg border border-[#333]">Note: Enter Track Name manually if Spotify link blocks metadata. Resolves to lossless audio.</div>
-        </div>
+        )}
       </div>
     </div>
   );

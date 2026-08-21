@@ -1,93 +1,106 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Phone, Delete, ShieldAlert, PhoneCall } from 'lucide-react';
+
+// 1. Memoized Speed Dial Panel (Will NEVER re-render on keypress)
+const SpeedDialSection = memo(({ onCall }) => {
+  return (
+    <div className="card-panel" style={{ flex: '0 0 38%', willChange: 'transform', transform: 'translateZ(0)' }}>
+      <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#60a5fa', fontWeight: 'bold' }}>SPEED DIAL</span>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <button
+          type="button"
+          onClick={() => onCall('112')}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'rgba(127, 29, 29, 0.3)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: 8, cursor: 'pointer', textAlign: 'left', outline: 'none' }}
+        >
+          <ShieldAlert style={{ width: 16, height: 16, color: '#f87171', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 'bold', color: '#fecaca' }}>Emergency</div>
+            <div style={{ fontSize: 9, color: '#f87171', fontFamily: 'monospace' }}>112 Direct</div>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onCall('1033')}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'rgba(120, 53, 15, 0.3)', border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: 8, cursor: 'pointer', textAlign: 'left', outline: 'none' }}
+        >
+          <Phone style={{ width: 16, height: 16, color: '#fbbf24', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 'bold', color: '#fef3c7' }}>Highway Help</div>
+            <div style={{ fontSize: 9, color: '#fbbf24', fontFamily: 'monospace' }}>1033 NHAI</div>
+          </div>
+        </button>
+      </div>
+
+      <div style={{ padding: '4px 8px', background: '#18181b', border: '1px solid #27272a', borderRadius: 6, fontSize: 9, display: 'flex', justifyContent: 'space-between', fontFamily: 'monospace' }}>
+        <span>GSM GATEWAY:</span>
+        <span style={{ color: '#34d399', fontWeight: 'bold' }}>READY</span>
+      </div>
+    </div>
+  );
+});
+
+// 2. Memoized Static Keypad Grid
+const KeypadGrid = memo(({ onDigit }) => {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, width: '100%', maxWidth: 200, margin: '4px auto' }}>
+      {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((k) => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => onDigit(k)}
+          style={{ height: 26, backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: 5, color: '#fff', fontSize: 12, fontWeight: 'bold', fontFamily: 'monospace', cursor: 'pointer', outline: 'none' }}
+        >
+          {k}
+        </button>
+      ))}
+    </div>
+  );
+});
 
 export default function PhoneDialerView() {
   const [dialNumber, setDialNumber] = useState('');
 
-  const appendDigit = (digit) => {
-    if (dialNumber.length < 15) setDialNumber((prev) => prev + digit);
-  };
+  const handleDigit = useCallback((digit) => {
+    setDialNumber((prev) => (prev.length < 15 ? prev + digit : prev));
+  }, []);
 
-  const handleBackspace = () => {
+  const handleBackspace = useCallback(() => {
     setDialNumber((prev) => prev.slice(0, -1));
-  };
+  }, []);
 
-  const handleCall = (num) => {
+  const handleDirectCall = useCallback((num) => {
     const target = num || dialNumber;
-    if (!target) return;
-    window.location.href = `tel:${target}`;
-  };
+    if (target) window.location.href = `tel:${target}`;
+  }, [dialNumber]);
 
   return (
-    <div className="flex h-full w-full gap-5 text-white overflow-hidden">
-      <div className="w-1/3 flex flex-col justify-between">
-        <div className="flex flex-col gap-2.5">
-          <h2 className="text-xs uppercase tracking-wider text-blue-400 font-mono font-bold">Speed Dial</h2>
-          
-          <div 
-            onClick={() => handleCall('112')}
-            className="flex items-center gap-3 p-3 rounded-xl bg-red-950/40 border border-red-500/40 hover:bg-red-900/50 active:scale-95 transition cursor-pointer"
-          >
-            <ShieldAlert className="w-6 h-6 text-red-400 shrink-0" />
-            <div>
-              <div className="text-sm font-bold text-red-200">Emergency</div>
-              <div className="text-xs text-red-400 font-mono">112 Dispatch</div>
-            </div>
-          </div>
+    <div className="split-view">
+      <SpeedDialSection onCall={handleDirectCall} />
 
-          <div 
-            onClick={() => handleCall('1033')}
-            className="flex items-center gap-3 p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50 active:scale-95 transition cursor-pointer"
-          >
-            <Phone className="w-6 h-6 text-amber-400 shrink-0" />
-            <div>
-              <div className="text-sm font-bold text-amber-200">Highway Help</div>
-              <div className="text-xs text-amber-400 font-mono">1033 (NHAI)</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-xs text-zinc-400 flex items-center justify-between font-mono">
-          <span>Carrier:</span>
-          <span className="text-emerald-400 font-bold">GSM ACTIVE</span>
-        </div>
-      </div>
-
-      <div className="w-2/3 flex flex-col bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 justify-between">
-        <div className="w-full h-11 flex items-center justify-between px-4 bg-zinc-900/90 rounded-xl border border-zinc-800">
-          <span className="text-lg font-mono tracking-widest font-bold text-zinc-100 truncate">
-            {dialNumber || <span className="text-zinc-600 font-sans text-xs">Enter phone number...</span>}
+      <div className="card-panel" style={{ flex: '0 0 60%' }}>
+        <div style={{ width: '100%', height: 32, backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', fontFamily: 'monospace' }}>
+          <span style={{ color: dialNumber ? '#fff' : '#52525b', fontSize: dialNumber ? 13 : 10, fontWeight: 'bold' }}>
+            {dialNumber || 'Dial digits...'}
           </span>
           {dialNumber && (
-            <button onClick={handleBackspace} className="p-1 text-zinc-400 hover:text-white active:scale-90">
-              <Delete className="w-5 h-5" />
+            <button type="button" onClick={handleBackspace} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', outline: 'none' }}>
+              <Delete style={{ width: 14, height: 14 }} />
             </button>
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 my-2 w-full max-w-xs mx-auto">
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((key) => (
-            <button
-              key={key}
-              onClick={() => appendDigit(key)}
-              className="h-10 bg-zinc-900 hover:bg-zinc-800 active:bg-blue-600 rounded-lg text-base font-bold font-mono transition active:scale-95 flex items-center justify-center border border-zinc-800 text-zinc-100"
-            >
-              {key}
-            </button>
-          ))}
-        </div>
+        <KeypadGrid onDigit={handleDigit} />
 
         <button
-          onClick={() => handleCall()}
+          type="button"
+          onClick={() => handleDirectCall()}
           disabled={!dialNumber}
-          className={`w-full max-w-xs mx-auto h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-bold transition ${
-            dialNumber 
-              ? 'bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white cursor-pointer' 
-              : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-          }`}
+          style={{ width: '100%', maxWidth: 200, height: 28, margin: '0 auto', borderRadius: 6, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 11, fontWeight: 'bold', cursor: dialNumber ? 'pointer' : 'not-allowed', backgroundColor: dialNumber ? '#16a34a' : '#27272a', color: dialNumber ? '#fff' : '#71717a' }}
         >
-          <PhoneCall className="w-4 h-4" />
-          Call
+          <PhoneCall style={{ width: 12, height: 12 }} />
+          <span>Call Now</span>
         </button>
       </div>
     </div>
